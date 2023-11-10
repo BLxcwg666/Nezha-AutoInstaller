@@ -4,8 +4,8 @@
 // | |\  |/ /_   / ___ \ | ||  _ <  |_____|  ___) |  __/ |   \ V /  __/ |   
 // |_| \_/____| /_/   \_\___|_| \_\         |____/ \___|_|    \_/ \___|_|   
 // 
-// Version 1.2 | By BLxcwg666 <huixcwg@gmail.com> @xcnya / @xcnyacn
-// Lastest Update at 2023/11/10 23:17
+// Version 1.3 | By BLxcwg666 <huixcwg@gmail.com> @xcnya / @xcnyacn
+// Lastest Update at 2023/11/10 23:35
 //「 幻术世界有什么不好，现实太残酷，只会让这空洞越来越大。」
 
 const axios = require('axios');
@@ -13,7 +13,8 @@ const crypto = require('crypto');
 const dotenv = require('dotenv').config();
 const fastify = require('fastify')({ logger: false });
 
-const version = '1.2';
+const version = '1.3';
+const serverToken = process.env.TOKEN;
 const nz_host = process.env.NZ_HOST;
 const cookies = "nezha-dashboard=" + process.env.NZ_COOKIE;
 
@@ -29,8 +30,16 @@ function random(length) {
   return result;
 }
 
+fastify.addHook('onRequest', (request, reply, done) => {
+  if (!request.routeOptions.url) {
+    reply.code(200).send({ "code": "200", "msg": "API Running", "version": `${version}`});
+  }
+
+  done();
+});
+
 fastify.addHook('preHandler', (request, reply, done) => {
-  const reqs = ['name', 'tag', 'index', 'note'];
+  const reqs = ['name', 'tag', 'index', 'note', 'token'];
   reqs.forEach(param => {
     if (request.query[param]) {
       request.query[param] = request.query[param].replace(/"/g, '');
@@ -40,16 +49,12 @@ fastify.addHook('preHandler', (request, reply, done) => {
   done();
 });
 
-fastify.addHook('onRequest', (request, reply, done) => {
-  if (!request.routeOptions.url) {
-    reply.code(200).send({ "code": "200", "msg": "API Running", "version": `${version}`});
+fastify.get('/add', async (request, reply) => {
+ const { name, tag, index, note, token } = request.query;
+  if (token !== serverToken) {
+    return reply.code(401).send({ "code": "401", "msg": "Unauthorized" });
   }
 
-  done();
-});
-
-fastify.get('/add', async (request, reply) => {
- const { name, tag, index, note } = request.query;
   const tempTag = random(5);
   const secret = random(18);
 
