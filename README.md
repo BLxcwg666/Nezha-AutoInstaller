@@ -8,7 +8,8 @@
 
 # Cookie 获取
 确保您已经登录到您的 Nezha Dashboard  
-F12 → Application → Cookies → nezha-dashboard
+F12 → Application → Cookies → nezha-dashboard  
+  
 ![image](https://github.com/BLxcwg666/Nezha-AutoInstaller/assets/66854530/613db0dd-e27e-41e4-9839-6b63d67b1897)  
 ![image](https://github.com/BLxcwg666/Nezha-AutoInstaller/assets/66854530/2d8cf28c-9749-4f2d-b633-3a151ff43583)  
 将此值填入 `.env` 文件中的 `NZ_COOKIE`
