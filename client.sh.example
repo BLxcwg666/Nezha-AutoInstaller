@@ -38,9 +38,8 @@ if [ $? -eq 0 ]; then
     
     if [ "$secret" != "null" ]; then
         echo "[STEP 3] API 返回 Secret：$secret"
-
-        # 在这里可以执行下一个命令，使用 $secret 作为变量
-        # 例如：echo "下一个命令的参数为 $secret"
+        echo "[STEP 4] 安装哪吒 Agent"
+        curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh install_agent :::NZ_AGENT::: :::NZ_PORT::: $secret
     else
         echo "[ERROR] API 请求失败：$code - $msg"
     fi
