@@ -4,7 +4,7 @@
 // | |\  |/ /_   / ___ \ | ||  _ <  |_____|  ___) |  __/ |   \ V /  __/ |   
 // |_| \_/____| /_/   \_\___|_| \_\         |____/ \___|_|    \_/ \___|_|   
 // 
-// Version 1.5 | By BLxcwg666 <huixcwg@gmail.com> @xcnya / @xcnyacn
+// Version 1.6 | By BLxcwg666 <huixcwg@gmail.com> @xcnya / @xcnyacn
 // Lastest Update at 2023/11/10 23:35
 //「 幻术世界有什么不好，现实太残酷，只会让这空洞越来越大。」
 
@@ -13,9 +13,16 @@ const path = require('path');
 const axios = require('axios');
 const crypto = require('crypto');
 const dotenv = require('dotenv').config();
-const fastify = require('fastify')({ logger: false });
+const fastify = require('fastify')({
+  http2: process.env.ENABLE_SSL,
+  https: {
+    allowHTTP1: true,
+    cert: fs.readFileSync(process.env.CERT_PATH),
+    key: fs.readFileSync(process.env.CERT_KEY_PATH)
+  }
+});
 
-const version = '1.5';
+const version = '1.6';
 const nz_host = process.env.NZ_HOST;
 const serverToken = process.env.API_TOKEN;
 const cookies = "nezha-dashboard=" + process.env.NZ_COOKIE;

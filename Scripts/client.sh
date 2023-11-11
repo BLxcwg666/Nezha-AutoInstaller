@@ -24,7 +24,7 @@ read -p "指定服务器 Tag: " tag
 read -p "指定服务器顺序: " index
 read -p "指定服务器备注: " note
 
-api_url="http://45.8.22.141:25500/add"
+api_url="https://yuanshen.com/add"
 api_token="114514"
 query_string="name=$name&tag=$tag&index=$index&note=$note&token=$api_token"
 
