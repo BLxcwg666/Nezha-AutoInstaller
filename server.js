@@ -4,7 +4,7 @@
 // | |\  |/ /_   / ___ \ | ||  _ <  |_____|  ___) |  __/ |   \ V /  __/ |   
 // |_| \_/____| /_/   \_\___|_| \_\         |____/ \___|_|    \_/ \___|_|   
 // 
-// Version 1.8 | By BLxcwg666 <huixcwg@gmail.com> @xcnya / @xcnyacn
+// Version 1.9 | By BLxcwg666 <huixcwg@gmail.com> @xcnya / @xcnyacn
 // Lastest Update at 2023/11/11 20:45
 //「 幻术世界有什么不好，现实太残酷，只会让这空洞越来越大。」
 
@@ -13,18 +13,13 @@ const path = require('path');
 const axios = require('axios');
 const crypto = require('crypto');
 const dotenv = require('dotenv').config();
-const fastify = require('fastify')({
-  http2: process.env.ENABLE_SSL,
-  https: {
-    allowHTTP1: true,
-    cert: fs.readFileSync(process.env.CERT_PATH),
-    key: fs.readFileSync(process.env.CERT_KEY_PATH)
-  }
-});
+const fastify = require('fastify');
 
-const version = '1.8';
+const version = '1.9';
+const app = fastify();
 const nz_host = process.env.NZ_HOST;
 const serverToken = process.env.API_TOKEN;
+// 懒得写 SSL 了，整个反代用用得了
 const cookies = "nezha-dashboard=" + process.env.NZ_COOKIE;
 
 // 随机数函数，后面要用
@@ -65,7 +60,7 @@ fs.readFile('client.sh.example', 'utf8', (err, data) => {
 });
 
 // 未匹配的路由
-fastify.addHook('onRequest', (request, reply, done) => {
+app.addHook('onRequest', (request, reply, done) => {
   if (!request.routeOptions.url) {
     reply.code(200).send({ "code": "200", "msg": "API Running", "version": `${version}`});
   }
@@ -74,7 +69,7 @@ fastify.addHook('onRequest', (request, reply, done) => {
 });
 
 // 过滤双引号
-fastify.addHook('preHandler', (request, reply, done) => {
+app.addHook('preHandler', (request, reply, done) => {
   const reqs = ['name', 'tag', 'index', 'note', 'token'];
   reqs.forEach(param => {
     if (request.query[param]) {
@@ -86,7 +81,7 @@ fastify.addHook('preHandler', (request, reply, done) => {
 });
 
 // 步入正题
-fastify.get('/add', async (request, reply) => {
+app.get('/add', async (request, reply) => {
  const { name, tag, index, note, token } = request.query;
   if (token !== serverToken) {  // 鉴权
     return reply.code(401).send({ "code": "401", "msg": "Unauthorized" });
@@ -138,7 +133,7 @@ fastify.get('/add', async (request, reply) => {
 });
 
 // 获取脚本
-fastify.get('/getScript', async (request, reply) => {
+app.get('/getScript', async (request, reply) => {
   const token = request.query.token;
   if (token !== serverToken) {  // 鉴权
     return reply.code(401).send({ "code": "401", "msg": "Unauthorized" });
@@ -156,7 +151,7 @@ fastify.get('/getScript', async (request, reply) => {
 });
 
 // 开机
-fastify.listen({ port: process.env.PORT, host: process.env.HOST }, (err) => {
+app.listen({ port: process.env.PORT, host: process.env.HOST }, (err) => {
   if (err) throw err;
   console.log('Server startted');
 });
