@@ -4,18 +4,20 @@
 // | |\  |/ /_   / ___ \ | ||  _ <  |_____|  ___) |  __/ |   \ V /  __/ |   
 // |_| \_/____| /_/   \_\___|_| \_\         |____/ \___|_|    \_/ \___|_|   
 // 
-// Version 1.3 | By BLxcwg666 <huixcwg@gmail.com> @xcnya / @xcnyacn
+// Version 1.5 | By BLxcwg666 <huixcwg@gmail.com> @xcnya / @xcnyacn
 // Lastest Update at 2023/11/10 23:35
 //「 幻术世界有什么不好，现实太残酷，只会让这空洞越来越大。」
 
+const fs = require('fs');
+const path = require('path');
 const axios = require('axios');
 const crypto = require('crypto');
 const dotenv = require('dotenv').config();
 const fastify = require('fastify')({ logger: false });
 
-const version = '1.3';
-const serverToken = process.env.TOKEN;
+const version = '1.5';
 const nz_host = process.env.NZ_HOST;
+const serverToken = process.env.API_TOKEN;
 const cookies = "nezha-dashboard=" + process.env.NZ_COOKIE;
 
 function random(length) {
@@ -29,6 +31,28 @@ function random(length) {
 
   return result;
 }
+
+const scriptsFolder = path.join(__dirname, 'Scripts');
+  if (!fs.existsSync(scriptsFolder)) {
+    fs.mkdirSync(scriptsFolder);
+}
+
+fs.readFile('client.sh.example', 'utf8', (err, data) => {
+    if (err) {
+        return console.error('Error:', err);
+    }
+
+    const editData = data.replace(/:::API_HOST:::/g, process.env.API_HOST).replace(/:::API_TOKEN:::/g, process.env.API_TOKEN);
+
+    fs.writeFile('./Scripts/client.sh', editData, { encoding: 'utf8', flag: 'w', EOL: '\n' }, (err) => {
+        if (err) {
+            console.error('Error:', err);
+            return;
+        }
+        console.log('OK');
+    });
+});
+
 
 fastify.addHook('onRequest', (request, reply, done) => {
   if (!request.routeOptions.url) {
@@ -68,7 +92,7 @@ fastify.get('/add', async (request, reply) => {
   };
 
   try {
-    const headers = { 'Cookie': cookies };
+    const headers = { 'Cookie': cookies, 'Content-Type': 'application/json; charset=utf-8' };
     const response1 = await axios.post(`${nz_host}/api/server`, request1, { headers });
     const response2 = await axios.get(`${nz_host}/api/v1/server/list?tag=${tempTag}`, { headers });
 
@@ -93,7 +117,38 @@ fastify.get('/add', async (request, reply) => {
   }
 });
 
-fastify.listen({ port: 8000 }, (err) => {
-  if (err) throw err;
-  console.log('Server is listening on port 8000');
+fastify.get('/getScript', async (request, reply) => {
+  const token = request.query.token;
+  if (token !== serverToken) {
+    return reply.code(401).send({ "code": "401", "msg": "Unauthorized" });
+  }
+  try {
+    const script = fs.readFileSync('./Scripts/client.sh', 'utf-8');
+    reply.header('Content-Type', 'text/plain; charset=utf-8');
+
+    reply.send(script);
+  } catch (error) {
+    console.error(error);
+    reply.code(500).send({ "code": "500", "msg": "出错了呜呜呜~ 请检查控制台输出喵~" });
+  }
 });
+
+fastify.listen({ port: process.env.PORT, host: process.env.HOST }, (err) => {
+  if (err) throw err;
+  console.log('Server startted');
+});
+
+// async function renewCookie() {
+//   try {
+//     const renewData = await axios.get(`${nz_host}/api/v1/server/list?tag=sbsbbsjzidhebjsjznznzjsjj`, {
+//       headers: {
+//         'Cookie': cookies
+//       }
+//     });
+//     console.log(renewData.data);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
+
+// setInterval(renewCookie, 30 * 60 * 1000);
