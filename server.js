@@ -4,8 +4,8 @@
 // | |\  |/ /_   / ___ \ | ||  _ <  |_____|  ___) |  __/ |   \ V /  __/ |   
 // |_| \_/____| /_/   \_\___|_| \_\         |____/ \___|_|    \_/ \___|_|   
 // 
-// Version 1.7 | By BLxcwg666 <huixcwg@gmail.com> @xcnya / @xcnyacn
-// Lastest Update at 2023/11/10 23:35
+// Version 1.8 | By BLxcwg666 <huixcwg@gmail.com> @xcnya / @xcnyacn
+// Lastest Update at 2023/11/11 20:45
 //「 幻术世界有什么不好，现实太残酷，只会让这空洞越来越大。」
 
 const fs = require('fs');
@@ -22,7 +22,7 @@ const fastify = require('fastify')({
   }
 });
 
-const version = '1.7';
+const version = '1.8';
 const nz_host = process.env.NZ_HOST;
 const serverToken = process.env.API_TOKEN;
 const cookies = "nezha-dashboard=" + process.env.NZ_COOKIE;
@@ -107,7 +107,7 @@ fastify.get('/add', async (request, reply) => {
 
   try {
     // 请求带上 Cookies
-    const headers = { 'Cookie': cookies, 'Content-Type': 'application/json; charset=utf-8' };
+    const headers = { 'Cookie': cookies, 'Content-Type': 'application/json; charset=utf-8', 'User-Agent': 'NAI/' + version };
     // 发第一次请求
     const response1 = await axios.post(`${nz_host}/api/server`, request1, { headers });
     // 发第二次请求，用于定位 id
